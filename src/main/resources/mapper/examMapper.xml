@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssm.crud.dao.examMapper">
+  <resultMap id="BaseResultMap" type="com.ssm.crud.bean.exam">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="examDate" jdbcType="TIMESTAMP" property="examdate" />
+    <result column="score" jdbcType="INTEGER" property="score" />
+    <result column="paperId" jdbcType="INTEGER" property="paperid" />
+    <result column="studentId" jdbcType="VARCHAR" property="studentid" />
+  </resultMap>
+  
+  <resultMap type="com.ssm.crud.bean.exam" id="WithSPResultMap">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="examDate" jdbcType="TIMESTAMP" property="examdate" />
+		<result column="score" jdbcType="INTEGER" property="score" />
+		<result column="paperId" jdbcType="INTEGER" property="paperid" />
+		<result column="studentId" jdbcType="VARCHAR" property="studentid" />
+		<association property="paper" javaType="com.ssm.crud.bean.paper">
+			<result column="papername" property="papername" />
+		</association>
+		<association property="student" javaType="com.ssm.crud.bean.student">
+			<result column="name" property="name" />
+		</association>
+	</resultMap>
+	<sql id="WithSP_Column_List">
+		t_exam.id, examDate, score, t_paper.papername, t_student.name,t_exam.studentId
+	</sql>
+	<select id="selectByExampleWithPaperandStudent" resultMap="WithSPResultMap">
+		select
+		<include refid="WithSP_Column_List" />
+		from t_exam,t_paper,t_student
+		where t_exam.paperId=t_paper.id and t_exam.studentId=t_student.id
+	</select>
+	<select id="selectByExampleWithPaper" parameterType="java.lang.Integer" resultMap="WithSPResultMap">
+		select
+		<include refid="WithSP_Column_List" />
+		from t_exam,t_student,t_paper
+		where t_exam.paperId=t_paper.id and
+		t_exam.studentId=t_student.id and t_student.id =
+		#{studentId}
+	</select>
+  
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, examDate, score, paperId, studentId
+  </sql>
+  <select id="selectByExample" parameterType="com.ssm.crud.bean.examExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_exam
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_exam
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_exam
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ssm.crud.bean.examExample">
+    delete from t_exam
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ssm.crud.bean.exam">
+    insert into t_exam (id, examDate, score, 
+      paperId, studentId)
+    values (#{id,jdbcType=INTEGER}, #{examdate,jdbcType=TIMESTAMP}, #{score,jdbcType=INTEGER}, 
+      #{paperid,jdbcType=INTEGER}, #{studentid,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ssm.crud.bean.exam">
+    insert into t_exam
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="examdate != null">
+        examDate,
+      </if>
+      <if test="score != null">
+        score,
+      </if>
+      <if test="paperid != null">
+        paperId,
+      </if>
+      <if test="studentid != null">
+        studentId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="examdate != null">
+        #{examdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="score != null">
+        #{score,jdbcType=INTEGER},
+      </if>
+      <if test="paperid != null">
+        #{paperid,jdbcType=INTEGER},
+      </if>
+      <if test="studentid != null">
+        #{studentid,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ssm.crud.bean.examExample" resultType="java.lang.Long">
+    select count(*) from t_exam
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_exam
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.examdate != null">
+        examDate = #{record.examdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.score != null">
+        score = #{record.score,jdbcType=INTEGER},
+      </if>
+      <if test="record.paperid != null">
+        paperId = #{record.paperid,jdbcType=INTEGER},
+      </if>
+      <if test="record.studentid != null">
+        studentId = #{record.studentid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_exam
+    set id = #{record.id,jdbcType=INTEGER},
+      examDate = #{record.examdate,jdbcType=TIMESTAMP},
+      score = #{record.score,jdbcType=INTEGER},
+      paperId = #{record.paperid,jdbcType=INTEGER},
+      studentId = #{record.studentid,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ssm.crud.bean.exam">
+    update t_exam
+    <set>
+      <if test="examdate != null">
+        examDate = #{examdate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="score != null">
+        score = #{score,jdbcType=INTEGER},
+      </if>
+      <if test="paperid != null">
+        paperId = #{paperid,jdbcType=INTEGER},
+      </if>
+      <if test="studentid != null">
+        studentId = #{studentid,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ssm.crud.bean.exam">
+    update t_exam
+    set examDate = #{examdate,jdbcType=TIMESTAMP},
+      score = #{score,jdbcType=INTEGER},
+      paperId = #{paperid,jdbcType=INTEGER},
+      studentId = #{studentid,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
